@@ -14,10 +14,10 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 @st.cache_resource
 def load_model():
     model_configs = {
-        'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
+        'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
     }
-    depth_model = DepthAnythingV2(**model_configs['vitl'])
-    checkpoint_path = 'checkpoints/depth_anything_v2_vitl.pth'
+    depth_model = DepthAnythingV2(**model_configs['vits'])
+    checkpoint_path = 'checkpoints/depth_anything_v2_vits.pth'
     depth_model.load_state_dict(torch.load(checkpoint_path, map_location='cpu'))
     return depth_model.to(DEVICE).eval()
 
