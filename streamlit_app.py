@@ -49,11 +49,8 @@ def process_image(uploaded_image, input_size, grayscale):
     img_resized = cv2.resize(img, (input_size, input_size))
     depth = depth_model.infer_image(img_resized, input_size)
     depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-    if grayscale:
-        depth_map = depth.astype(np.uint8)
-        depth_map = np.stack([depth_map] * 3, axis=-1)  # Convert single channel to 3 channels
-    else:
-        depth_map = cv2.applyColorMap(depth.astype(np.uint8), cv2.COLORMAP_JET)
+    depth = depth.astype(np.uint8)
+    depth_map = np.repeat(depth[..., np.newaxis], 3, axis=-1)
     return img, depth_map
 
 # Streamlit App
@@ -86,9 +83,9 @@ if uploaded_file:
         
         col1, col2 = st.columns(2)
         with col1:
-            st.image(original, caption="Original Image", use_column_width=True)
+            st.image(original, caption="Original Image", use_container_width=True)
         with col2:
-            st.image(depth_map, caption="Depth Map", use_column_width=True)
+            st.image(depth_map, caption="Depth Map", use_container_width=True)
         
         # Download Option
         _, col, _ = st.columns([1, 2, 1])
