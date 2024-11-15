@@ -46,8 +46,8 @@ depth_model = load_model()
 def process_image(uploaded_image, input_size, grayscale):
     """Process the uploaded image and predict depth."""
     img = cv2.imdecode(np.frombuffer(uploaded_image.read(), np.uint8), cv2.IMREAD_COLOR)
-    img_resized = cv2.resize(img, (input_size, input_size))
-    depth = depth_model.infer_image(img_resized, input_size)
+    #img_resized = cv2.resize(img, (input_size, input_size))
+    depth = depth_model.infer_image(img)
     depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
     depth = depth.astype(np.uint8)
     depth_map = np.repeat(depth[..., np.newaxis], 3, axis=-1)
@@ -67,8 +67,8 @@ st.markdown("""
 
 # Sidebar
 st.sidebar.header("Configuration")
-#input_size = st.sidebar.slider("Input Size", 256, 1024, 518, step=32)
-#grayscale = st.sidebar.checkbox("Generate Grayscale Depth Map", value=False)
+input_size = st.sidebar.slider("Input Size", 256, 1024, 518, step=32)
+grayscale = st.sidebar.checkbox("Generate Grayscale Depth Map", value=False)
 
 # File Upload
 uploaded_file = st.file_uploader("Upload an Image (JPG, PNG, JPEG only)", type=["jpg", "png", "jpeg"])
