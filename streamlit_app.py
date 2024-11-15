@@ -51,6 +51,7 @@ def process_image(uploaded_image, input_size, grayscale):
     depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
     depth = depth.astype(np.uint8)
     depth_map = np.repeat(depth[..., np.newaxis], 3, axis=-1)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img, depth_map
 
 # Streamlit App
@@ -66,11 +67,11 @@ st.markdown("""
 
 # Sidebar
 st.sidebar.header("Configuration")
-input_size = st.sidebar.slider("Input Size", 256, 1024, 518, step=32)
-grayscale = st.sidebar.checkbox("Generate Grayscale Depth Map", value=False)
+#input_size = st.sidebar.slider("Input Size", 256, 1024, 518, step=32)
+#grayscale = st.sidebar.checkbox("Generate Grayscale Depth Map", value=False)
 
 # File Upload
-uploaded_file = st.file_uploader("Upload an Image (JPG, PNG, JPEG only)", type=["jpg", "png", "jpeg", "mp4", "avi", "mkv"])
+uploaded_file = st.file_uploader("Upload an Image (JPG, PNG, JPEG only)", type=["jpg", "png", "jpeg"])
 
 if uploaded_file:
     # Check if the uploaded file is a video
