@@ -43,14 +43,18 @@ def load_model():
 
 depth_model = load_model()
 
-def process_image(uploaded_image, input_size):
+def process_image(uploaded_image, input_size, grayscale):
     """Process the uploaded image and predict depth."""
     img = cv2.imdecode(np.frombuffer(uploaded_image.read(), np.uint8), cv2.IMREAD_COLOR)
     img_resized = cv2.resize(img, (input_size, input_size))
     depth = depth_model.infer_image(img_resized, input_size)
     depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-    depth_colormap = cv2.applyColorMap(depth.astype(np.uint8), cv2.COLORMAP_JET)
-    return img, depth_colormap
+    if grayscale:
+        depth_map = depth.astype(np.uint8)
+        depth_map = np.stack([depth_map] * 3, axis=-1)  # Convert single channel to 3 channels
+    else:
+        depth_map = cv2.applyColorMap(depth.astype(np.uint8), cv2.COLORMAP_JET)
+    return img, depth_map
 
 # Streamlit App
 #st.set_page_config(page_title="Depth Map Prediction", layout="wide")
@@ -59,32 +63,37 @@ def process_image(uploaded_image, input_size):
 st.title("Depth Map Prediction Application")
 st.markdown("""
     This app allows you to upload an image and predicts its depth map using advanced AI models.
-    - Supports high-quality depth map generation.
+    - Supports grayscale and color depth map generation.
     - Outputs a side-by-side comparison of the original image and depth map.
 """)
 
 # Sidebar
 st.sidebar.header("Configuration")
 input_size = st.sidebar.slider("Input Size", 256, 1024, 518, step=32)
+grayscale = st.sidebar.checkbox("Generate Grayscale Depth Map", value=False)
 
 # File Upload
-uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Upload an Image (JPG, PNG, JPEG only)", type=["jpg", "png", "jpeg", "mp4", "avi", "mkv"])
 
 if uploaded_file:
-    st.subheader("Original Image and Depth Map")
-    with st.spinner("Processing..."):
-        original, depth_map = process_image(uploaded_file, input_size)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(original, caption="Original Image", use_column_width=True)
-    with col2:
-        st.image(depth_map, caption="Depth Map", use_column_width=True)
-    
-    # Download Option
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
-        depth_map_file = cv2.imencode('.png', depth_map)[1].tobytes()
-        st.download_button("Download Depth Map", depth_map_file, file_name="depth_map.png")
+    # Check if the uploaded file is a video
+    if uploaded_file.type in ["video/mp4", "video/avi", "video/x-matroska"]:
+        st.error("⚠️ Video files are not supported. Please upload an image.")
+    else:
+        st.subheader("Original Image and Depth Map")
+        with st.spinner("Processing..."):
+            original, depth_map = process_image(uploaded_file, input_size, grayscale)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(original, caption="Original Image", use_column_width=True)
+        with col2:
+            st.image(depth_map, caption="Depth Map", use_column_width=True)
+        
+        # Download Option
+        _, col, _ = st.columns([1, 2, 1])
+        with col:
+            depth_map_file = cv2.imencode('.png', depth_map)[1].tobytes()
+            st.download_button("Download Depth Map", depth_map_file, file_name="depth_map.png")
 
 st.info("For any feedback or issues, contact support@example.com")
