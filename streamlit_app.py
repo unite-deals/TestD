@@ -53,7 +53,7 @@ def process_image(uploaded_image, input_size):
     return img, depth_colormap
 
 # Streamlit App
-st.set_page_config(page_title="Depth Map Prediction", layout="wide")
+#st.set_page_config(page_title="Depth Map Prediction", layout="wide")
 
 # UI Layout
 st.title("Depth Map Prediction Application")
