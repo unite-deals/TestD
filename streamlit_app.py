@@ -5,6 +5,26 @@ import torch
 from depth_anything_v2.dpt import DepthAnythingV2
 import matplotlib
 
+hide_github_link_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visiblity: hidden;}
+    header {visibility: hidden;}
+        .viewerBadge_container__1QSob {
+            display: none !important;
+        }
+    </style>
+"""
+st.markdown(hide_github_link_style, unsafe_allow_html=True)
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+
 # Constants
 IPD = 6.5
 MONITOR_W = 38.5
@@ -14,10 +34,10 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 @st.cache_resource
 def load_model():
     model_configs = {
-        'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
+        'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
     }
-    depth_model = DepthAnythingV2(**model_configs['vitl'])
-    checkpoint_path = 'checkpoints/depth_anything_v2_vitl.pth'
+    depth_model = DepthAnythingV2(**model_configs['vits'])
+    checkpoint_path = 'checkpoints/depth_anything_v2_vits.pth'
     depth_model.load_state_dict(torch.load(checkpoint_path, map_location='cpu'))
     return depth_model.to(DEVICE).eval()
 
